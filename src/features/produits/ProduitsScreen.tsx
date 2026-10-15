@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Pencil, Plus, Search, SearchX, Shirt, Trash2 } from "lucide-react"
+import { LayoutGrid, LayoutList, Pencil, Plus, Search, SearchX, Shirt, Trash2 } from "lucide-react"
 
 import { useData } from "@/data/useData"
 import type { Produit } from "@/data/seed/produits"
@@ -19,7 +19,18 @@ import { PrixProduit } from "@/features/produits/PrixProduit"
 import { STOCK_BADGE, stockStatut, stockTotal } from "@/features/produits/produit"
 
 type FiltreStatut = "tous" | "actifs" | "inactifs"
+type VueMode = "table" | "grille"
 const TOUTES = "toutes"
+const VUE_CLE = "dm-produits-vue"
+
+/** Remembered view mode (per-viewer convenience; falls back to table). */
+function lireVue(): VueMode {
+  try {
+    return localStorage.getItem(VUE_CLE) === "grille" ? "grille" : "table"
+  } catch {
+    return "table"
+  }
+}
 
 /**
  * Admin › Produits — the catalogue. One primary action (Nouveau produit),
@@ -34,7 +45,17 @@ export function ProduitsScreen() {
   const [recherche, setRecherche] = useState("")
   const [categorie, setCategorie] = useState(TOUTES)
   const [statut, setStatut] = useState<FiltreStatut>("tous")
+  const [vue, setVue] = useState<VueMode>(lireVue)
   const [aSupprimer, setASupprimer] = useState<Produit | null>(null)
+
+  const changerVue = (v: VueMode) => {
+    setVue(v)
+    try {
+      localStorage.setItem(VUE_CLE, v)
+    } catch {
+      /* private mode / blocked storage — view just won't persist */
+    }
+  }
 
   // Toast handed over by the product page ("Produit supprimé"), shown once.
   useEffect(() => {
@@ -148,6 +169,31 @@ export function ProduitsScreen() {
                   { value: "inactifs", label: "Inactifs", badge: produits.length - actifs },
                 ]}
               />
+              {/* View switcher — table / grid (desktop only; phones stay a card list) */}
+              <div className="hidden items-center gap-1 rounded-md border border-border p-1 md:inline-flex">
+                <button
+                  type="button"
+                  onClick={() => changerVue("table")}
+                  aria-label="Vue tableau"
+                  aria-pressed={vue === "table"}
+                  className={`flex size-7 items-center justify-center rounded transition-colors ${
+                    vue === "table" ? "bg-surface-nested text-ink" : "text-ink-muted hover:text-ink"
+                  }`}
+                >
+                  <LayoutList className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => changerVue("grille")}
+                  aria-label="Vue grille"
+                  aria-pressed={vue === "grille"}
+                  className={`flex size-7 items-center justify-center rounded transition-colors ${
+                    vue === "grille" ? "bg-surface-nested text-ink" : "text-ink-muted hover:text-ink"
+                  }`}
+                >
+                  <LayoutGrid className="size-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -167,7 +213,7 @@ export function ProduitsScreen() {
           ) : (
             <>
               {/* Desktop: table */}
-              <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
+              <div className={`${vue === "table" ? "hidden md:block" : "hidden"} overflow-x-auto rounded-lg border border-border`}>
                 <table className="w-full min-w-[760px] border-collapse">
                   <thead>
                     <tr className="border-b border-border text-left">
@@ -253,6 +299,65 @@ export function ProduitsScreen() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Desktop: grid */}
+              {vue === "grille" ? (
+                <div className="hidden gap-4 md:grid md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                  {visibles.map(({ p, stock, etat }) => (
+                    <div
+                      key={p.id}
+                      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-background transition-colors hover:border-border-strong"
+                    >
+                      <Link to={`/admin/produits/${p.id}`} className="block">
+                        <ProduitThumb image={p.images[0] ?? ""} nom={p.nom} size="xl" className="rounded-none border-0" />
+                      </Link>
+                      <div className="flex flex-1 flex-col gap-2 p-3.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex min-w-0 flex-col">
+                            <Link
+                              to={`/admin/produits/${p.id}`}
+                              className="truncate font-ui text-sm font-medium text-ink transition-colors group-hover:text-brand-blue-600"
+                            >
+                              {p.nom}
+                            </Link>
+                            <span className="truncate font-body text-xs text-ink-muted">
+                              <span className="font-mono">{p.reference || "—"}</span> · {nomCategorie(p.categorieId)}
+                            </span>
+                          </div>
+                          <Badge variant={STOCK_BADGE[etat].variant}>{stock}</Badge>
+                        </div>
+                        <PrixProduit produit={p} />
+                        <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-2.5">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={p.actif}
+                              onChange={(v) => toggle(p, v)}
+                              label={p.actif ? `Désactiver ${p.nom}` : `Activer ${p.nom}`}
+                            />
+                            <span className="font-body text-xs text-ink-muted">{p.actif ? "Actif" : "Inactif"}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button asChild variant="ghost" size="icon-sm" aria-label={`Modifier ${p.nom}`}>
+                              <Link to={`/admin/produits/${p.id}`}>
+                                <Pencil className="size-4" />
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={`Supprimer ${p.nom}`}
+                              className="text-ink-muted hover:text-danger"
+                              onClick={() => setASupprimer(p)}
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
 
               {/* Phone: card list */}
               <ul className="flex flex-col gap-3 md:hidden">
