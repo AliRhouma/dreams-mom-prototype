@@ -96,7 +96,7 @@ export function BoutiqueShopScreen() {
 
       <div className="flex items-start gap-5">
         {/* Desktop sidebar */}
-        <aside className="hidden w-[295px] shrink-0 rounded-[20px] border border-black/10 p-5 md:block md:p-6">
+        <aside className="sticky top-24 hidden max-h-[calc(100vh-7rem)] w-[295px] shrink-0 self-start overflow-y-auto rounded-[20px] border border-black/10 p-5 md:block md:p-6">
           {Sidebar}
         </aside>
 
