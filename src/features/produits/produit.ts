@@ -80,8 +80,8 @@ export function textePalier(p: Pick<PalierQuantite, "quantite" | "remise" | "rem
 }
 
 /** A déclinaison being edited; `nouvelle` rows don't exist in the store yet. */
-export type LigneDecl = { id: string; valeurs: string[]; stock: number; nouvelle?: boolean }
+export type LigneDecl = { id: string; valeurs: string[]; stock: number; image: string; nouvelle?: boolean }
 
 export function nouvelleLigne(nbOptions: number): LigneDecl {
-  return { id: crypto.randomUUID(), valeurs: Array<string>(nbOptions).fill(""), stock: 0, nouvelle: true }
+  return { id: crypto.randomUUID(), valeurs: Array<string>(nbOptions).fill(""), stock: 0, image: "", nouvelle: true }
 }

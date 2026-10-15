@@ -81,11 +81,12 @@ Seed: `src/data/seed/declinaisons.ts` (+ `tiktak/declinaisons.json`) · Screens:
 | id | string | slug |
 | produitId | string | → Produit.id (**cascade delete**) |
 | valeurs | string[] | one value per `Produit.options`, same order (`["Gris", "S"]`); a value may be empty |
+| image | string | the variant's photo (TikTak *photo*, usually one of the product's images); `""` = none. The shop switches the main photo to it when the client picks the variant |
 | stock | number | per variant |
 
 **Left out on purpose** (not shown by a screen yet): stock movements history,
 per-variant price (7 imported products have one — the product price is used),
-inactive variants (100, not imported), variant photos, purchase / dealer price,
+inactive variants (100, not imported), purchase / dealer price,
 badge colours of quantity formulas, a brands screen (*Marque* is free text with
 suggestions), the whole *Website & SEO* page builder.
 

@@ -1,0 +1,48 @@
+/* ===========================================================================
+   Storefront (Shopco re-skin) — fonts + scoped helpers
+   ---------------------------------------------------------------------------
+   Loaded ONLY by the client boutique. It never redefines a Dreams Mom design
+   token, so the admin keeps its own look. Satoshi is the free body face
+   (shipped from /public/fonts); the heavy uppercase display face is Anton
+   (Google Fonts, loaded in index.html) as a free substitute for Shopco's
+   commercial Integral CF — see THIRD_PARTY_NOTICES.md.
+   =========================================================================== */
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Scoped font helpers — used only inside the storefront, no Tailwind token
+   collision with the admin's --font-display / --font-ui. */
+.font-body-shopco {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+}
+.font-display-shopco {
+  font-family: "Anton", "Satoshi", system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+/* Hide number-input spinners inside the storefront quantity fields. */
+.storefront-root input[type="number"]::-webkit-outer-spin-button,
+.storefront-root input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

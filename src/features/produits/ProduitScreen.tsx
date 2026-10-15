@@ -104,7 +104,7 @@ function ProduitEditor({ produit }: { produit?: Produit }) {
   const enregistre: Fiche = produit ? sansId(produit) : produitVide("")
   const declsEnregistrees: LigneDecl[] = declinaisons
     .filter((d) => d.produitId === id)
-    .map((d) => ({ id: d.id, valeurs: d.valeurs, stock: d.stock }))
+    .map((d) => ({ id: d.id, valeurs: d.valeurs, stock: d.stock, image: d.image }))
 
   const [fiche, setFiche] = useState<Fiche>(enregistre)
   const [decls, setDecls] = useState<LigneDecl[]>(declsEnregistrees)
@@ -154,7 +154,7 @@ function ProduitEditor({ produit }: { produit?: Produit }) {
     paliers: fiche.paliers.map((p) => ({ ...p, texte: p.texte.trim(), badge: p.badge.trim() })),
   })
   /** Store-ready déclinaison fields (no id, no draft flag). */
-  const champsDecl = (d: LigneDecl) => ({ valeurs: d.valeurs.map((v) => v.trim()), stock: d.stock })
+  const champsDecl = (d: LigneDecl) => ({ valeurs: d.valeurs.map((v) => v.trim()), stock: d.stock, image: d.image })
 
   const annuler = () => {
     setFiche(enregistre)

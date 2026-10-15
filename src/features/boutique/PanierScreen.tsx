@@ -1,50 +1,38 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
+import { Link } from "react-router-dom"
+import { ArrowRight, CheckCircle2, Trash2 } from "lucide-react"
 
 import { useData } from "@/data/useData"
-import { EmptyState } from "@/components/kit/EmptyState"
-import { Field } from "@/components/kit/Field"
-import { Price } from "@/components/kit/Price"
-import { Panel } from "@/components/kit/Primitives"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { GOUVERNORATS } from "@/data/seed/commandes"
-import { formatDT } from "@/lib/format"
-import { ProduitThumb } from "@/features/produits/ProduitThumb"
+import { CartCounter } from "@/features/boutique/shopco/CartCounter"
+import { ShopImage } from "@/features/boutique/shopco/ShopImage"
+import { formatPrixDT, produitHref, toCartLineVM } from "@/features/boutique/shopco/adapters"
 import {
   commandeBoutique,
   formulaireVide,
   validerFormulaire,
   type FormulaireClient,
 } from "@/features/boutique/commander"
-import { ConfirmationCommande } from "@/features/boutique/ProduitVitrineScreen"
+import { GOUVERNORATS } from "@/data/seed/commandes"
 
-const FRAIS = 8
+const LIVRAISON = 8
 
-/** Boutique › Panier — récapitulatif + formulaire client → passe la commande. */
+/**
+ * Boutique › Panier — Shopco cart re-skin. Totals come from my cart (panier)
+ * and are never recomputed by a widget; "Passer la commande" calls my existing
+ * order actions (addCommande + addLigneCommande) so it ripples into the admin.
+ */
 export function PanierScreen() {
   const { panier, updateArticlePanier, removeArticlePanier, viderPanier, addCommande, addLigneCommande } = useData()
-  const navigate = useNavigate()
   const [form, setForm] = useState<FormulaireClient>(formulaireVide)
   const [tente, setTente] = useState(false)
   const [confirmee, setConfirmee] = useState<number | null>(null)
 
-  const sousTotal = panier.reduce((n, a) => n + a.prixUnitaire * a.quantite, 0)
-  const nbArticles = panier.reduce((n, a) => n + a.quantite, 0)
-  const total = sousTotal + (panier.length ? FRAIS : 0)
+  const lignes = panier.map(toCartLineVM)
+  const sousTotal = lignes.reduce((n, l) => n + l.lineTotal, 0)
+  const total = sousTotal + (lignes.length ? LIVRAISON : 0)
   const erreurs = validerFormulaire(form)
   const valide = Object.keys(erreurs).length === 0 && panier.length > 0
   const set = (k: keyof FormulaireClient, v: string) => setForm((f) => ({ ...f, [k]: v }))
-
-  const changerQte = (id: string, q: number) => updateArticlePanier(id, { quantite: Math.max(1, q) })
 
   const commander = () => {
     if (!valide) {
@@ -60,155 +48,178 @@ export function PanierScreen() {
     setConfirmee(commande.numero)
   }
 
-  if (panier.length === 0 && confirmee === null) {
+  // Confirmation
+  if (confirmee !== null) {
     return (
-      <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-8">
-        <Link
-          to="/client"
-          className="mb-6 inline-flex items-center gap-2 font-ui text-sm text-ink-muted transition-colors hover:text-ink"
-        >
-          <ArrowLeft className="size-4" />
+      <div className="mx-auto flex max-w-[1240px] flex-col items-center px-4 py-24 text-center">
+        <CheckCircle2 className="mb-5 size-16 text-black" strokeWidth={1.25} />
+        <h1 className="font-display-shopco mb-3 text-[32px] uppercase md:text-[40px]">Commande confirmée</h1>
+        <p className="mb-8 max-w-md text-black/60">
+          Votre commande <span className="font-medium text-black">#{confirmee}</span> a bien été enregistrée.
+          Nous vous appellerons pour confirmer la livraison.
+        </p>
+        <Link to="/client/shop" className="rounded-full bg-black px-10 py-4 text-white transition-all hover:bg-black/80">
           Continuer mes achats
         </Link>
-        <div className="rounded-lg border border-border">
-          <EmptyState
-            icon={ShoppingBag}
-            title="Votre panier est vide"
-            description="Parcourez la collection et ajoutez vos articles préférés."
-            action={<Button asChild><Link to="/client">Voir la collection</Link></Button>}
-          />
-        </div>
+      </div>
+    )
+  }
+
+  // Empty
+  if (panier.length === 0) {
+    return (
+      <div className="mx-auto flex max-w-[1240px] flex-col items-center px-4 py-24 text-center text-black/40">
+        <ShopImage src="" alt="" className="mb-5 size-20 rounded-full bg-[#F0F0F0]" />
+        <p className="mb-5 text-black/60">Votre panier est vide.</p>
+        <Link to="/client/shop" className="rounded-full bg-black px-10 py-3.5 text-white transition-all hover:bg-black/80">
+          Découvrir la collection
+        </Link>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-4 py-8 sm:px-8">
-      <div>
-        <Link
-          to="/client"
-          className="mb-4 inline-flex items-center gap-2 font-ui text-sm text-ink-muted transition-colors hover:text-ink"
-        >
-          <ArrowLeft className="size-4" />
-          Continuer mes achats
-        </Link>
-        <h1 className="font-display text-[1.75rem] leading-tight font-normal text-ink">Mon panier</h1>
-        <p className="font-body text-sm text-ink-muted">
-          {nbArticles} article{nbArticles > 1 ? "s" : ""} dans votre panier
-        </p>
+    <div className="mx-auto max-w-[1240px] px-4 pb-20 xl:px-0">
+      <div className="mb-5 flex items-center gap-1.5 pt-5 text-sm text-black/60">
+        <Link to="/client" className="hover:text-black">Accueil</Link>
+        <span aria-hidden>/</span>
+        <span className="text-black">Panier</span>
       </div>
+      <h1 className="font-display-shopco mb-5 text-[32px] uppercase md:mb-6 md:text-[40px]">Mon panier</h1>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        {/* Lignes du panier */}
-        <ul className="flex flex-col gap-3">
-          {panier.map((a) => (
-            <li key={a.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
-              <ProduitThumb image={a.image} nom={a.nom} size="lg" />
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="truncate font-ui text-sm font-medium text-ink">{a.nom}</span>
-                <span className="font-body text-xs text-ink-muted">{formatDT(a.prixUnitaire)} DT / unité</span>
-                <div className="mt-1 flex items-center gap-1 self-start rounded-md border border-border-strong">
-                  <button
-                    type="button"
-                    onClick={() => changerQte(a.id, a.quantite - 1)}
-                    aria-label="Diminuer la quantité"
-                    disabled={a.quantite <= 1}
-                    className="flex size-7 items-center justify-center text-ink-muted transition-colors hover:text-ink disabled:opacity-40"
-                  >
-                    <Minus className="size-3.5" />
-                  </button>
-                  <span className="w-7 text-center font-ui text-sm text-ink tabular-nums">{a.quantite}</span>
-                  <button
-                    type="button"
-                    onClick={() => changerQte(a.id, a.quantite + 1)}
-                    aria-label="Augmenter la quantité"
-                    className="flex size-7 items-center justify-center text-ink-muted transition-colors hover:text-ink"
-                  >
-                    <Plus className="size-3.5" />
-                  </button>
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        {/* Items */}
+        <div className="w-full flex-col space-y-4 rounded-[20px] border border-black/10 p-3.5 md:space-y-6 md:px-6">
+          {lignes.map((l, idx) => (
+            <div key={l.id}>
+              <div className="flex items-start gap-4">
+                <Link to={produitHref(panier[idx].produitId)} className="w-full min-w-[100px] max-w-[100px] overflow-hidden rounded-lg sm:max-w-[124px]">
+                  <ShopImage src={l.image} alt={l.title} fit="cover" className="aspect-square h-full w-full" />
+                </Link>
+                <div className="flex w-full flex-col self-stretch">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base font-bold xl:text-xl">{l.title}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeArticlePanier(l.id)}
+                      aria-label={`Retirer ${l.title}`}
+                      className="text-[#FF3333] transition-opacity hover:opacity-70"
+                    >
+                      <Trash2 className="size-5" />
+                    </button>
+                  </div>
+                  {l.taille ? (
+                    <div className="-mt-0.5 text-xs text-black md:text-sm">
+                      Taille : <span className="text-black/60">{l.taille}</span>
+                    </div>
+                  ) : null}
+                  {l.couleur ? (
+                    <div className="text-xs text-black md:text-sm">
+                      Couleur : <span className="text-black/60">{l.couleur}</span>
+                    </div>
+                  ) : null}
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
+                    <span className="text-xl font-bold xl:text-2xl">{formatPrixDT(l.lineTotal)}</span>
+                    <CartCounter
+                      value={l.quantite}
+                      onChange={(q) => updateArticlePanier(l.id, { quantite: q })}
+                      className="max-h-10 min-w-[105px] max-w-[105px] px-5 py-2 sm:max-w-32"
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-2">
-                <Price value={a.prixUnitaire * a.quantite} size="sm" />
-                <button
-                  type="button"
-                  onClick={() => removeArticlePanier(a.id)}
-                  aria-label={`Retirer ${a.nom}`}
-                  className="flex size-7 items-center justify-center text-ink-muted transition-colors hover:text-danger"
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              </div>
-            </li>
+              {idx < lignes.length - 1 ? <hr className="mt-4 border-black/10 md:mt-6" /> : null}
+            </div>
           ))}
-        </ul>
+        </div>
 
-        {/* Récap + formulaire */}
-        <div className="flex flex-col gap-4 lg:sticky lg:top-20">
-          <Panel title="Récapitulatif">
-            <div className="flex flex-col gap-3">
-              <LigneRecap label="Sous-total" value={`${formatDT(sousTotal)} DT`} />
-              <LigneRecap label="Livraison" value={`${formatDT(FRAIS)} DT`} />
-              <div className="flex items-center justify-between gap-4 border-t border-border pt-3">
-                <span className="font-ui text-base font-medium text-ink">Total</span>
-                <Price value={total} size="md" />
-              </div>
+        {/* Summary + checkout */}
+        <div className="w-full flex-col space-y-5 rounded-[20px] border border-black/10 p-5 md:px-6 lg:max-w-[505px]">
+          <h2 className="text-xl font-bold md:text-2xl">Récapitulatif</h2>
+          <div className="flex flex-col space-y-4">
+            <Row label="Sous-total" value={formatPrixDT(sousTotal)} />
+            <Row label="Livraison" value={formatPrixDT(LIVRAISON)} />
+            <hr className="border-black/10" />
+            <div className="flex items-center justify-between">
+              <span className="text-black md:text-xl">Total</span>
+              <span className="text-xl font-bold md:text-2xl">{formatPrixDT(total)}</span>
             </div>
-          </Panel>
+          </div>
 
-          <Panel title="Vos coordonnées">
-            <div className="flex flex-col gap-3">
-              <Field label="Nom et prénom" htmlFor="p-nom" required error={tente ? erreurs.nom : undefined}>
-                <Input id="p-nom" value={form.nom} onChange={(e) => set("nom", e.target.value)} placeholder="Nom et prénom" />
-              </Field>
-              <Field label="Téléphone" htmlFor="p-tel" required error={tente ? erreurs.telephone : undefined}>
-                <Input
-                  id="p-tel"
-                  value={form.telephone}
-                  onChange={(e) => set("telephone", e.target.value.replace(/[^\d]/g, ""))}
-                  placeholder="Téléphone"
-                  inputMode="numeric"
-                  className="font-mono"
-                />
-              </Field>
-              <Field label="Gouvernorat" required error={tente ? erreurs.gouvernorat : undefined}>
-                <Select value={form.gouvernorat} onValueChange={(v) => set("gouvernorat", v)}>
-                  <SelectTrigger className="h-9 py-0" aria-label="Gouvernorat">
-                    <SelectValue placeholder="Choisir un gouvernorat" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {GOUVERNORATS.map((g) => (
-                      <SelectItem key={g} value={g}>{g}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label="Adresse" htmlFor="p-adr" required error={tente ? erreurs.adresse : undefined}>
-                <Input id="p-adr" value={form.adresse} onChange={(e) => set("adresse", e.target.value)} placeholder="Adresse" />
-              </Field>
-              <Button size="lg" className="mt-1 w-full" onClick={commander}>
-                <ShoppingBag className="size-4" />
-                Passer la commande · {formatDT(total)} DT
-              </Button>
+          <hr className="border-black/10" />
+          <h3 className="font-bold">Vos coordonnées</h3>
+          <div className="flex flex-col gap-3">
+            <ChampTexte label="Nom et prénom" value={form.nom} onChange={(v) => set("nom", v)} error={tente ? erreurs.nom : undefined} placeholder="Nom et prénom" />
+            <ChampTexte label="Téléphone" value={form.telephone} onChange={(v) => set("telephone", v.replace(/[^\d]/g, ""))} error={tente ? erreurs.telephone : undefined} placeholder="Téléphone" mono />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-black/70">Gouvernorat</label>
+              <select
+                value={form.gouvernorat}
+                onChange={(e) => set("gouvernorat", e.target.value)}
+                className="rounded-full bg-[#F0F0F0] px-4 py-3 text-sm outline-none"
+              >
+                <option value="">Choisir un gouvernorat</option>
+                {GOUVERNORATS.map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+              {tente && erreurs.gouvernorat ? <p className="text-xs text-[#FF3333]">{erreurs.gouvernorat}</p> : null}
             </div>
-          </Panel>
+            <ChampTexte label="Adresse" value={form.adresse} onChange={(v) => set("adresse", v)} error={tente ? erreurs.adresse : undefined} placeholder="Adresse complète" />
+          </div>
+
+          <button
+            type="button"
+            onClick={commander}
+            className="group flex h-[54px] w-full items-center justify-center gap-2 rounded-full bg-black text-sm font-medium text-white transition-all hover:bg-black/80 md:h-[60px] md:text-base"
+          >
+            Passer la commande · {formatPrixDT(total)}
+            <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+          </button>
         </div>
       </div>
-
-      <ConfirmationCommande
-        numero={confirmee}
-        onClose={() => setConfirmee(null)}
-        onContinuer={() => navigate("/client")}
-      />
     </div>
   )
 }
 
-function LigneRecap({ label, value }: { label: string; value: string }) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="font-ui text-sm text-ink-muted">{label}</span>
-      <span className="font-ui text-sm text-ink tabular-nums">{value}</span>
+    <div className="flex items-center justify-between">
+      <span className="text-black/60 md:text-xl">{label}</span>
+      <span className="font-bold md:text-xl">{value}</span>
+    </div>
+  )
+}
+
+function ChampTexte({
+  label,
+  value,
+  onChange,
+  error,
+  placeholder,
+  mono,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  error?: string
+  placeholder?: string
+  mono?: boolean
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-medium text-black/70">{label}</label>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        inputMode={mono ? "numeric" : undefined}
+        className={
+          "rounded-full bg-[#F0F0F0] px-4 py-3 text-sm outline-none placeholder:text-black/40 " +
+          (mono ? "font-mono" : "")
+        }
+      />
+      {error ? <p className="text-xs text-[#FF3333]">{error}</p> : null}
     </div>
   )
 }

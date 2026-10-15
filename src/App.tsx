@@ -5,9 +5,11 @@ import { navLeaves } from "@/lib/navigation"
 import { DataProvider } from "@/data/DataProvider"
 import { AppShell } from "@/shells/AppShell"
 import { Placeholder } from "@/components/kit/Placeholder"
+import { ScrollToTop } from "@/components/ScrollToTop"
 import { RoleSelectScreen } from "@/features/roles/RoleSelectScreen"
 import { BoutiqueShell } from "@/features/boutique/BoutiqueShell"
 import { BoutiqueHome } from "@/features/boutique/BoutiqueHome"
+import { BoutiqueShopScreen } from "@/features/boutique/BoutiqueShopScreen"
 import { ProduitVitrineScreen } from "@/features/boutique/ProduitVitrineScreen"
 import { PanierScreen } from "@/features/boutique/PanierScreen"
 import { AdminDashboardScreen } from "@/features/admin/AdminDashboardScreen"
@@ -30,11 +32,13 @@ export default function App() {
   return (
     <DataProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route index element={<RoleSelectScreen />} />
 
           <Route path="client" element={<BoutiqueShell />}>
             <Route index element={<BoutiqueHome />} />
+            <Route path="shop" element={<BoutiqueShopScreen />} />
             <Route path="produit/:produitId" element={<ProduitVitrineScreen />} />
             <Route path="panier" element={<PanierScreen />} />
           </Route>

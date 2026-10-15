@@ -144,6 +144,13 @@ function useCurrentTitle(): string {
  */
 export function AppShell() {
   const title = useCurrentTitle()
+  const { pathname } = useLocation()
+  // The admin scrolls inside this container, not the window: each new screen
+  // starts at its top (ScrollToTop only resets the window).
+  const zone = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    zone.current?.scrollTo({ top: 0, left: 0, behavior: "instant" })
+  }, [pathname])
 
   return (
     <SidebarProvider defaultOpen={readSidebarDefaultOpen()}>
@@ -164,7 +171,7 @@ export function AppShell() {
           </div>
         </header>
 
-        <div className="min-h-0 flex-1 scroll-pb-24 overflow-auto px-4 py-5 sm:px-6 sm:py-6 md:px-8">
+        <div ref={zone} className="min-h-0 flex-1 scroll-pb-24 overflow-auto px-4 py-5 sm:px-6 sm:py-6 md:px-8">
           <Outlet />
         </div>
       </SidebarInset>

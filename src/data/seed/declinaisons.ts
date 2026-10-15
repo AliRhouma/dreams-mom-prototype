@@ -13,6 +13,8 @@ export type Declinaison = {
   /** One value per Produit.options, same order; a value may be empty. */
   valeurs: string[]
   stock: number
+  /** The variant's photo (usually one of the product's images), "" = none. The shop shows it when the client picks this variant. */
+  image: string
 }
 
 export const declinaisonsSeed: Declinaison[] = tiktakDeclinaisons
