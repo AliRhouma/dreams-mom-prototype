@@ -1,0 +1,34 @@
+[
+ {
+  "id": "cat-haut",
+  "nom": "HAUT"
+ },
+ {
+  "id": "cat-bas",
+  "nom": "BAS"
+ },
+ {
+  "id": "cat-chaussures",
+  "nom": "CHAUSSURES"
+ },
+ {
+  "id": "cat-ensemble",
+  "nom": "ENSEMBLE"
+ },
+ {
+  "id": "cat-accessoires",
+  "nom": "ACCESSOIRES"
+ },
+ {
+  "id": "cat-limited-selection",
+  "nom": "LIMITED SELECTION"
+ },
+ {
+  "id": "cat-soldes",
+  "nom": "SOLDES"
+ },
+ {
+  "id": "cat-capuche",
+  "nom": "CAPUCHE"
+ }
+]

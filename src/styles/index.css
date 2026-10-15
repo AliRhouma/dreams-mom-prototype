@@ -1,0 +1,438 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Jost:wght@300..600&display=swap");
+@import "tailwindcss";
+
+/* ===========================================================================
+   Dreams Mom — Design Tokens (2026 brand refresh)
+   ---------------------------------------------------------------------------
+   Single source of truth for the WHITE, brand-blue menswear UI system.
+   `@theme inline` below binds Tailwind utilities to these variables; shadcn
+   semantic aliases are mapped so shadcn/ui primitives theme correctly.
+
+   This system is LIGHT-ONLY by design — there is no dark theme.
+   Legacy token names (--green, --team-*, --heat-*) are kept so existing code
+   resolves, but they now point at the brand-blue / neutral palette.
+   =========================================================================== */
+
+:root {
+  /* ---- Base ---- */
+  font-family: "Jost", system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  color-scheme: light;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* ---- Brand blue — "Bleu Dreams", sampled from the logo (#1414A0) --------
+     One ramp drives buttons, links, tags, active states. 600 is the brand. */
+  --brand-blue-50: #f0f0fb; /* tint / soft background */
+  --brand-blue-100: #e0e0f7; /* selected row, tag fill */
+  --brand-blue-200: #c2c2ee;
+  --brand-blue-300: #9393de;
+  --brand-blue-400: #5c5cc9;
+  --brand-blue-500: #2f2fb5; /* lighter accent (info, links on tint) */
+  --brand-blue-600: #1a1aa6; /* THE brand blue — buttons, logo, links */
+  --brand-blue-700: #13138a; /* hover / pressed */
+  --brand-blue-800: #0e0e6b;
+  --brand-blue-900: #09094a; /* deepest — rare hero blocks */
+
+  /* Legacy brand aliases — the old "green" names now resolve to brand blue */
+  --green: var(--brand-blue-600);
+  --green-dim: var(--brand-blue-700);
+  --green-glow: rgba(26, 26, 166, 0.12);
+  --green-button: var(--brand-blue-600);
+
+  /* ---- Purple — AI / special-action accent ------------------------------ */
+  --purple: #6d4fd8; /* AI / generative actions only */
+  --purple-dim: #5136b8;
+
+  /* ---- Surfaces — white canvas, TWO structural fills -----------------------
+     #ffffff = the page (--background), #f7f7f7 = any filled element on it.
+     Separate nested regions with a BORDER. The only nested fill inside a
+     #f7f7f7 card is #efefef (--surface-nested). */
+  --surface-deep: #f2f2f2; /* app-shell chrome only (very rare) */
+  --surface-subtle: #ffffff; /* primary page background — pure white */
+  --surface-muted: #f7f7f7;
+  --surface: #f7f7f7; /* card / element surface */
+  --surface-nested: #efefef; /* the ONLY fill allowed nested inside a card */
+  --surface-panel: #fafafa; /* sidebar */
+  --surface-hover: rgba(17, 17, 17, 0.04); /* hover overlay, not a new layer */
+  --input-bg: #ffffff; /* inputs are white + bordered */
+
+  /* ---- Neutral scale — TRUE neutral (R=G=B), light → dark ----------------- */
+  --neutral-0: #ffffff; /* page */
+  --neutral-50: #f7f7f7; /* element surface */
+  --neutral-100: #efefef; /* nested fill */
+  --neutral-150: #e5e5e5; /* default border */
+  --neutral-200: #d6d6d6; /* strong border */
+  --neutral-300: #a8a8a8; /* disabled / placeholder */
+  --neutral-400: #8a8a8a;
+  --neutral-500: #666666; /* body / secondary text */
+  --neutral-600: #3d3d3d; /* secondary emphasis */
+  --neutral-700: #2a2a2a;
+  --neutral-800: #1c1c1c;
+  --neutral-900: #111111; /* primary text / titles */
+  --neutral-950: #000000;
+
+  /* ---- Ink (text) ---------------------------------------------------------- */
+  --ink: var(--neutral-900); /* #111111 */
+  --ink-subtle: var(--neutral-600); /* #3d3d3d */
+  --ink-muted: var(--neutral-500); /* #666666 — most-used secondary */
+  --ink-disabled: var(--neutral-300); /* #a8a8a8 */
+  --ink-inverted: #ffffff; /* text on brand-blue / dark fills */
+
+  /* ---- Data encoding ---------------------------------------------------- */
+  --team-home: var(--brand-blue-600);
+  --team-away: #c62f3a;
+
+  /* ---- Heatmap stops (data viz only) — brand-blue sequential ramp -------- */
+  --heat-0: rgba(26, 26, 166, 0);
+  --heat-1: rgba(26, 26, 166, 0.12);
+  --heat-2: rgba(26, 26, 166, 0.35);
+  --heat-3: rgba(26, 26, 166, 0.6);
+  --heat-4: rgba(26, 26, 166, 0.9);
+
+  /* ---- Status — deep, legible on white ---------------------------------- */
+  --success: #1f7a4d; /* in stock, paid, delivered */
+  --warning: #985f08; /* low stock, pending — 5.5:1 on white */
+  --danger: #c62f3a; /* errors, out of stock, refunds, destructive */
+  --info: var(--brand-blue-500);
+
+  --success-600: var(--success);
+  --error-600: var(--danger);
+  --warning-600: var(--warning);
+
+  /* ---- Accent — brand blue carries every interactive cue ---------------- */
+  --accent: var(--brand-blue-600);
+  --accent-soft: rgba(26, 26, 166, 0.08);
+  --accent-text: var(--brand-blue-600);
+
+  /* ---- Misc accents ----------------------------------------------------- */
+  --blue: var(--brand-blue-600);
+  --amber: #8a6420; /* premium / "édition limitée" badges — sparse */
+
+  /* ---- New-palette named aliases --------------------------------------- */
+  --default-font: var(--ink);
+  --subtext-color: var(--ink-muted);
+  --neutral-border: var(--border);
+  --default-background: var(--surface-subtle);
+
+  /* ---- Borders, rings, inputs ------------------------------------------- */
+  --border: #e5e5e5; /* default hairline everywhere */
+  --border-second: #dcdcdc; /* mid-weight separators */
+  --border-strong: #c7c7c7; /* inputs / hover / emphasis */
+  --border-hover: #c7c7c7;
+  --border-focus: #111111; /* focus = ink edge — crisp, tailored */
+  --border-green: rgba(26, 26, 166, 0.3); /* brand-blue emphasis edge */
+  --input-border: #949494; /* 3:1 on white — control boundary */
+  --ring: rgba(26, 26, 166, 0.18);
+
+  /* ---- Fonts --------------------------------------------------------------
+     DM Serif Display (high-contrast display serif, one weight + italic) for
+     display: page titles, product names, the wordmark. Never numbers.
+     Jost (Futura-style geometric sans) for every piece of UI and body copy. */
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-ui: "Jost", system-ui, sans-serif;
+  --font-body: "Jost", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-headline: "DM Serif Display", Georgia, serif;
+
+  /* ---- Radii — tailored, tight corners --------------------------------- */
+  --radius-sm: 2px; /* inputs, icon buttons */
+  --radius-md: 4px; /* buttons */
+  --radius: 4px;
+  --radius-lg: 8px; /* cards */
+  --radius-xl: 12px; /* modals */
+  --radius-pill: 100px;
+  --radius-full: 9999px;
+
+  /* ---- Shadows — soft, neutral lift on white ---------------------------- */
+  --shadow-glow: 0 1px 2px rgba(17, 17, 17, 0.04), 0 8px 24px rgba(17, 17, 17, 0.06);
+  --shadow-card: 0 1px 2px rgba(17, 17, 17, 0.05), 0 4px 12px rgba(17, 17, 17, 0.04);
+  --shadow-deep: 0 24px 48px rgba(17, 17, 17, 0.14);
+  --shadow-focus: 0 0 0 3px rgba(26, 26, 166, 0.18);
+
+  /* ---- shadcn semantic aliases ------------------------------------------ */
+  --background: var(--surface-subtle);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--brand-blue-600);
+  --primary-foreground: var(--ink-inverted);
+  --secondary: var(--surface-nested);
+  --secondary-foreground: var(--ink-subtle);
+  --muted: var(--surface-nested);
+  --muted-foreground: var(--ink-muted);
+  --accent-bg: rgba(17, 17, 17, 0.04);
+  --accent-bg-foreground: var(--ink);
+  --destructive: var(--danger);
+  --destructive-foreground: #ffffff;
+}
+
+/* ===========================================================================
+   Tailwind v4 @theme bridge — registers tokens as utility classes.
+   =========================================================================== */
+@theme inline {
+  /* ---- Brand & data colors ---- */
+  --color-brand: var(--green);
+  --color-brand-dim: var(--green-dim);
+  --color-green-button: var(--green-button);
+
+  /* ---- Brand blue scale (new) — bg-/text-/border-brand-blue-NNN ---- */
+  --color-brand-blue-50: var(--brand-blue-50);
+  --color-brand-blue-100: var(--brand-blue-100);
+  --color-brand-blue-200: var(--brand-blue-200);
+  --color-brand-blue-300: var(--brand-blue-300);
+  --color-brand-blue-400: var(--brand-blue-400);
+  --color-brand-blue-500: var(--brand-blue-500);
+  --color-brand-blue-600: var(--brand-blue-600);
+  --color-brand-blue-700: var(--brand-blue-700);
+  --color-brand-blue-800: var(--brand-blue-800);
+  --color-brand-blue-900: var(--brand-blue-900);
+
+  /* ---- Purple — AI / special accent (new) ---- */
+  --color-purple: var(--purple);
+  --color-purple-dim: var(--purple-dim);
+  --color-team-home: var(--team-home);
+  --color-team-away: var(--team-away);
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
+
+  /* ---- Surfaces & ink ---- */
+  --color-surface: var(--surface);
+  --color-surface-deep: var(--surface-deep);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-nested: var(--surface-nested);
+  --color-surface-panel: var(--surface-panel);
+  --color-surface-hover: var(--surface-hover);
+  --color-ink: var(--ink);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-disabled: var(--ink-disabled);
+  --color-ink-inverted: var(--ink-inverted);
+
+  /* ---- Neutral scale (bg-/text-/border-neutral-NNN) — pick a step directly ---- */
+  --color-neutral-0: var(--neutral-0);
+  --color-neutral-50: var(--neutral-50);
+  --color-neutral-100: var(--neutral-100);
+  --color-neutral-150: var(--neutral-150);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-300: var(--neutral-300);
+  --color-neutral-400: var(--neutral-400);
+  --color-neutral-500: var(--neutral-500);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-800: var(--neutral-800);
+  --color-neutral-900: var(--neutral-900);
+  --color-neutral-950: var(--neutral-950);
+
+  /* ---- Status ---- */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-amber: var(--amber);
+  --color-blue: var(--blue);
+
+  /* ---- Status (new softer variants) ---- */
+  --color-success-600: var(--success-600);
+  --color-error-600: var(--error-600);
+  --color-warning-600: var(--warning-600);
+
+  /* ---- Accent (blue) — non-button accent ---- */
+  --color-accent-blue: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  /* ---- shadcn semantic aliases ---- */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent-bg);
+  --color-accent-foreground: var(--accent-bg-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-border-second: var(--border-second);
+  --color-border-strong: var(--border-strong);
+  --color-border-focus: var(--border-focus);
+  --color-input: var(--input-border);
+  --color-input-bg: var(--input-bg);
+  --color-ring: var(--ring);
+
+  /* ---- Fonts ---- */
+  --font-display: var(--font-display);
+  --font-ui: var(--font-ui);
+  --font-body: var(--font-body);
+  --font-headline: var(--font-headline);
+
+  /* ---- Radii ---- */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+  --radius-full: var(--radius-full);
+
+  /* ---- Shadows ---- */
+  --shadow-glow: var(--shadow-glow);
+  --shadow-card: var(--shadow-card);
+  --shadow-deep: var(--shadow-deep);
+}
+
+/* ===========================================================================
+   Base layer
+   =========================================================================== */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+    max-width: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-ui); /* Jost; titles opt into font-display (DM Serif) */
+    color: var(--ink);
+    letter-spacing: 0;
+  }
+  *:focus-visible {
+    outline: 2px solid var(--border-focus); /* ink outline — crisp on white */
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+  /* Native <select> menus: give the option list an explicit white surface +
+     ink text so every native dropdown matches the light theme. */
+  select {
+    color-scheme: light;
+  }
+  select option,
+  select optgroup {
+    background-color: var(--surface);
+    color: var(--ink);
+  }
+  select optgroup {
+    color: var(--ink-muted);
+  }
+  select option:disabled {
+    color: var(--ink-disabled);
+  }
+}
+
+/* ===========================================================================
+   Utility helpers
+   =========================================================================== */
+@layer utilities {
+  .text-gradient-green {
+    background: linear-gradient(135deg, var(--brand-blue-500), var(--brand-blue-800));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .glow-green {
+    box-shadow: var(--shadow-glow);
+  }
+  /* Toast entrance — slides up + fades in (design-system §12 easing). */
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-toast-in {
+    animation: toast-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* Dropdown / menu entrance — a short fade + settle, no bounce. */
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-pop-in {
+    animation: pop-in 0.14s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Results reveal — a quiet fade + rise (design-system §12 motion). */
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-up {
+    animation: fade-up 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Collapsible panel — the height is measured by Radix and handed over as a
+     CSS var, so the reveal can be animated without a fixed height. Same 260ms
+     fluid easing as the navigable-card fill. */
+  @keyframes collapsible-down {
+    from {
+      height: 0;
+      opacity: 0;
+    }
+    to {
+      height: var(--radix-collapsible-content-height);
+      opacity: 1;
+    }
+  }
+  @keyframes collapsible-up {
+    from {
+      height: var(--radix-collapsible-content-height);
+      opacity: 1;
+    }
+    to {
+      height: 0;
+      opacity: 0;
+    }
+  }
+  .animate-collapsible {
+    overflow: hidden;
+  }
+  .animate-collapsible[data-state="open"] {
+    animation: collapsible-down 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .animate-collapsible[data-state="closed"] {
+    animation: collapsible-up 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
